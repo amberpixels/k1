@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"time"
 
-	abureflect "github.com/amberpixels/abu/reflect"
+	reflectish "github.com/amberpixels/abu/reflect"
 )
 
 // AsString converts the given input into a string or a string-like representation.
@@ -60,7 +60,7 @@ func AsString(a any) string {
 
 	// Then fallback to reflect, in case we have custom string/[]byte types
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	if v.Kind() == reflect.String {
 		return v.String()
@@ -102,7 +102,7 @@ func AsBytes(a any) []byte {
 
 	// Then fallback to reflect, in case we have custom string/[]byte types
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeOf([]byte{})) {
 		return v.Bytes()
@@ -138,7 +138,7 @@ func AsBool(a any) bool {
 
 	// fallback to reflect
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	if v.Kind() == reflect.Bool {
 		return v.Bool()
@@ -238,7 +238,7 @@ func AsInt(a any) int {
 
 	// fallback to reflect
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	switch {
 	case v.Kind() >= reflect.Int && v.Kind() <= reflect.Int64:
@@ -325,7 +325,7 @@ func AsFloat(a any) float64 {
 
 	// fallback to reflect
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	switch {
 	case v.Kind() >= reflect.Float32 && v.Kind() <= reflect.Float64:
@@ -388,7 +388,7 @@ func AsSliceOfAny(v any) []any {
 
 	// Then fallback to reflect
 	rv := reflect.ValueOf(v)
-	rv = abureflect.IndirectDeep(rv)
+	rv = reflectish.IndirectDeep(rv)
 
 	if rv.Kind() == reflect.Slice {
 		slice := make([]any, rv.Len())
@@ -411,7 +411,7 @@ func AsStrings(v any) []string {
 
 	// Then fallback to reflect
 	rv := reflect.ValueOf(v)
-	rv = abureflect.IndirectDeep(rv)
+	rv = reflectish.IndirectDeep(rv)
 	st := reflect.TypeOf("")
 
 	// todo: support arrays?
@@ -452,7 +452,7 @@ func AsTime(a any) time.Time {
 
 	// fallback to reflect
 	v := reflect.ValueOf(a)
-	v = abureflect.IndirectDeep(v)
+	v = reflectish.IndirectDeep(v)
 
 	if v.CanConvert(reflect.TypeFor[time.Time]()) {
 		t, _ := v.Interface().(time.Time)

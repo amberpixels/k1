@@ -1,5 +1,5 @@
-// Package abureflect contains helpers that extends standard reflect library
-package abureflect
+// Package reflectish contains helpers that extends standard reflect library
+package reflectish
 
 import "reflect"
 

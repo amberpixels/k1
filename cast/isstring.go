@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	abureflect "github.com/amberpixels/abu/reflect"
+	reflectish "github.com/amberpixels/abu/reflect"
 )
 
 // IsString checks if the given input is a string or string-like.
@@ -71,7 +71,7 @@ func IsString(a any, opts ...optIsString) bool {
 
 	v := reflect.ValueOf(a)
 	if cfg.AllowDeepPointers {
-		v = abureflect.IndirectDeep(v)
+		v = reflectish.IndirectDeep(v)
 	} else if cfg.AllowPointers {
 		v = reflect.Indirect(v)
 	}

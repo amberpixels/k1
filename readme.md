@@ -44,7 +44,7 @@ The `abucast` package also provides functions for checking if a value is of a ce
 
 ### Reflection Helpers
 
-The `abureflect` package provides helper functions for working with reflection:
+The `reflectish` package provides helper functions for working with reflection:
 
 - `IndirectDeep`: Recursively dereference pointers
 - `LengthOf`: Get the length of various types (maps, arrays, strings, channels, slices)
@@ -101,10 +101,10 @@ import (
 
 // Recursively dereference pointers
 v := reflect.ValueOf(&someValue)
-v = abureflect.IndirectDeep(v)
+v = reflectish.IndirectDeep(v)
 
 // Get the length of a value
-length, ok := abureflect.LengthOf(someValue)
+length, ok := reflectish.LengthOf(someValue)
 if ok {
     // Length is available
 }

@@ -1,4 +1,4 @@
-package abureflect_test
+package reflectish_test
 
 import (
 	"testing"
