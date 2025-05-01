@@ -1,4 +1,4 @@
-package abucast
+package cast
 
 import (
 	"reflect"

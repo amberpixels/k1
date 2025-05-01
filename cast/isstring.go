@@ -1,10 +1,10 @@
-package abucast
+package cast
 
 import (
 	"encoding/json"
 	"reflect"
 
-	reflectish "github.com/amberpixels/abu/reflect"
+	"github.com/amberpixels/abu/reflectish"
 )
 
 // IsString checks if the given input is a string or string-like.

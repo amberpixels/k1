@@ -19,7 +19,7 @@ go get github.com/amberpixels/abu
 
 ### Type Casting
 
-The `abucast` package provides functions for converting between different types:
+The `cast` package provides functions for converting between different types:
 
 - `AsString`: Convert a value to a string
 - `AsBytes`: Convert a value to a byte slice
@@ -33,7 +33,7 @@ The `abucast` package provides functions for converting between different types:
 
 ### Type Checking
 
-The `abucast` package also provides functions for checking if a value is of a certain type:
+The `cast` package also provides functions for checking if a value is of a certain type:
 
 - `IsString`: Check if a value is a string (with configurable options)
 - `IsStringish`: Check if a value is string-like
@@ -57,17 +57,17 @@ The `reflectish` package provides helper functions for working with reflection:
 import "github.com/amberpixels/abu/cast"
 
 // Convert a byte slice to a string
-str = abucast.AsString([]byte("byte_data")) // "byte_data"
+str = cast.AsString([]byte("byte_data")) // "byte_data"
 
 // Convert a custom string type
 type CustomString string
-str = abucast.AsString(CustomString("example")) // "example"
+str = cast.AsString(CustomString("example")) // "example"
 
 // Convert an integer
-num := abucast.AsInt(42) // "42"
+num := cast.AsInt(42) // "42"
 
 // Convert a float
-f := abucast.AsFloat(3.14) // "3.14"
+f := cast.AsFloat(3.14) // "3.14"
 ```
 
 ### Type Checking
@@ -76,17 +76,17 @@ f := abucast.AsFloat(3.14) // "3.14"
 import "github.com/amberpixels/abu/cast"
 
 // Check if a value is a string
-if abucast.IsString("example") {
+if cast.IsString("example") {
     // It's a string
 }
 
 // Check if a value is string-like (string, []byte, etc.)
-if abucast.IsStringish([]byte("example")) {
+if cast.IsStringish([]byte("example")) {
     // It's string-like
 }
 
 // Check if a value is nil
-if abucast.IsNil(someValue) {
+if cast.IsNil(someValue) {
     // It's nil
 }
 ```

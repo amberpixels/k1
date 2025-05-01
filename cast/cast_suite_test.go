@@ -1,4 +1,4 @@
-package abucast_test
+package cast_test
 
 import (
 	"testing"
