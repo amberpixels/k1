@@ -5,3 +5,9 @@ go.work
 .idea
 
 output.txt
+
+*.private.http
+*.private.patch
+*.private.txt
+*.private.json
+*.private.yaml
