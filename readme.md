@@ -1,6 +1,6 @@
 # Abu
 
-Abu — Aladdin's loyal monkey sidekick for your code, tackling type casting, reflection helpers, patterns, and every little utility chore.
+Abu — A Simple Toolkit for Casting, Reflection, and Everyday Go Utilities.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/amberpixels/abu.svg)](https://pkg.go.dev/github.com/amberpixels/abu)
 [![Go Report Card](https://goreportcard.com/badge/github.com/amberpixels/abu)](https://goreportcard.com/report/github.com/amberpixels/abu)
