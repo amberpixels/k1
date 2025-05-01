@@ -98,7 +98,7 @@ var _ = Describe("Is", func() {
 		It("should return true for int64", func() {
 			Expect(abucast.IsInt(int64(123))).To(BeTrue())
 		})
-		It("should return false for uint", func() {
+		It("should return true for uint", func() {
 			Expect(abucast.IsInt(uint(123))).To(BeTrue())
 		})
 

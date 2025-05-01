@@ -1,6 +1,6 @@
 module github.com/amberpixels/abu
 
-go 1.24.2
+go 1.23.8
 
 require (
 	github.com/onsi/ginkgo/v2 v2.23.4

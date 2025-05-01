@@ -1,3 +1,19 @@
+// Package abucast provides utility functions for type casting and type checking.
+//
+// This package is designed to simplify type conversions and type checking in Go code,
+// particularly useful in testing scenarios. It offers a set of functions for converting
+// between different types (As* functions) and for checking if a value is of a certain type
+// (Is* functions).
+//
+// The As* functions (AsString, AsBytes, AsBool, AsInt, AsFloat, etc.) attempt to convert
+// a value to the specified type, panicking if the conversion is not possible. This approach
+// is suitable for testing code where panics are acceptable.
+//
+// The Is* functions (IsString, IsStringish, IsNil, IsInt, etc.) check if a value is of a
+// certain type or can be converted to that type, returning a boolean result.
+//
+// The package also provides configuration options for customizing type checking behavior,
+// particularly for string types.
 package abucast
 
 import (
@@ -376,7 +392,7 @@ func AsSliceOfAny(v any) []any {
 
 	if rv.Kind() == reflect.Slice {
 		slice := make([]any, rv.Len())
-		for i := range rv.Len() {
+		for i := 0; i < rv.Len(); i++ {
 			slice[i] = rv.Index(i).Interface()
 		}
 		return slice
@@ -389,8 +405,8 @@ func AsSliceOfAny(v any) []any {
 // AsStrings converts the given input into a []string.
 func AsStrings(v any) []string {
 	// First start with a type casting
-	if tstrs, ok := v.([]string); ok {
-		return tstrs
+	if strs, ok := v.([]string); ok {
+		return strs
 	}
 
 	// Then fallback to reflect
@@ -401,7 +417,7 @@ func AsStrings(v any) []string {
 	// todo: support arrays?
 	if rv.Kind() == reflect.Slice {
 		slice := make([]string, rv.Len())
-		for i := range rv.Len() {
+		for i := 0; i < rv.Len(); i++ {
 			if !rv.Index(i).Type().ConvertibleTo(st) {
 				panic(fmt.Sprintf("expected a slice string! Got s[%d] <%T>: %#v", i, v, v))
 			}

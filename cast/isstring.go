@@ -12,11 +12,11 @@ import (
 // customizing the type-checking behavior, making it a versatile utility for testing code.
 // It supports both strict and non-strict mode checks, allowing you to precisely control
 // which types are considered string-like. It also provides options for handling custom types,
-// pointer de-referencing.
+// pointer dereferencing.
 //
 // Example Usage:
 //
-//	// In a non-strict check, allows custom types, pointer de-referencing.
+//	// In a non-strict check, allows custom types, the pointer dereferencing.
 //	IsString("example", AllowCustomTypes(), AllowPointers())) // returns true
 //
 //	// In a strict check, only actual strings are accepted
@@ -34,7 +34,7 @@ func IsString(a any, opts ...optIsString) bool {
 		return ok
 	}
 
-	// building a default config and override it with users options
+	// building a default config and override it with user's options
 	cfg := defaultIsStringConfig.clone()
 	for _, opt := range opts {
 		opt(cfg)
@@ -67,7 +67,7 @@ func IsString(a any, opts ...optIsString) bool {
 		}
 	}
 
-	// Further we can only try reflect
+	// Further, we can only try reflection
 
 	v := reflect.ValueOf(a)
 	if cfg.AllowDeepPointers {
@@ -95,7 +95,9 @@ func IsString(a any, opts ...optIsString) bool {
 	return false
 }
 
-// `omitempty` tag is needed for marshalling for IsStrict() func.
+// isStringConfig stores config for IsString() function
+// Note: `omitempty` tag is needed for marshalling for IsStrict() func.
+// TODO(?): refactor this, avoid such json,omitempty hack
 type isStringConfig struct {
 	AllowCustomTypes     bool `json:"allow_custom_types,omitempty"`
 	AllowBytesConversion bool `json:"allow_bytes_conversion,omitempty"`
@@ -111,16 +113,13 @@ func init() {
 	ConfigureIsStringConfig()
 }
 
-// clone is done via json round-trip marshalling.
+// clone is done via simple struct-copy (we're fine with this for now)
 func (cis *isStringConfig) clone() *isStringConfig {
-	// errors are omitted intentionally, as here we can't fail
-	contents, _ := json.Marshal(cis)
-	var clone isStringConfig
-	_ = json.Unmarshal(contents, &clone)
+	var clone = *cis
 	return &clone
 }
 
-// IsString() in strict mode will return true only for actual `string` values.
+// IsStrict returns if IsString() should be strict: so it will return true only for actual `string` values.
 func (cis *isStringConfig) IsStrict() bool {
 	// Strict mode is when all flags are false
 	marshalled, _ := json.Marshal(cis)
@@ -131,10 +130,8 @@ func (cis *isStringConfig) IsStrict() bool {
 func (cis *isStringConfig) AllowsAll() bool {
 	el := reflect.ValueOf(cis).Elem()
 	var result = true
-	for i := range el.NumField() {
-		result = result && el.Field(i).Bool()
-
-		if !result {
+	for i := 0; i < el.NumField(); i++ {
+		if result = result && el.Field(i).Bool(); !result {
 			break
 		}
 	}
@@ -180,8 +177,17 @@ func AllowAll() optIsString {
 	return func(cfg *isStringConfig) {
 		v := reflect.ValueOf(cfg).Elem()
 
-		for i := range v.NumField() {
+		for i := 0; i < v.NumField(); i++ {
 			v.Field(i).SetBool(true)
 		}
+	}
+}
+
+// Strict option enforces strict string type checking for IsString.
+// In strict mode, only actual string values will return true.
+func Strict() optIsString {
+	return func(cfg *isStringConfig) {
+		// In strict mode, all flags are false
+		*cfg = isStringConfig{}
 	}
 }
