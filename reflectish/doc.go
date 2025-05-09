@@ -7,7 +7,7 @@
 //
 // Usage:
 //
-//	import "github.com/amberpixels/abu/reflectish"
+//	import "github.com/amberpixels/k1/reflectish"
 //
 //	// Deeply dereference pointers
 //	val := reflect.ValueOf(&&myStruct)

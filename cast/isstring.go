@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/amberpixels/abu/reflectish"
+	"github.com/amberpixels/k1/reflectish"
 )
 
 // IsString checks if the given input is a string or string-like.

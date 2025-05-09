@@ -1,18 +1,18 @@
-# Abu
+# k1t (k1)
 
-Abu — A Simple Toolkit for Casting, Reflection, and Everyday Go Utilities.
+k1t — A Simple Toolkit for Casting, Reflection, and Everyday Go Utilities.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/amberpixels/abu.svg)](https://pkg.go.dev/github.com/amberpixels/abu)
-[![Go Report Card](https://goreportcard.com/badge/github.com/amberpixels/abu)](https://goreportcard.com/report/github.com/amberpixels/abu)
+[![Go Reference](https://pkg.go.dev/badge/github.com/amberpixels/k1.svg)](https://pkg.go.dev/github.com/amberpixels/k1)
+[![Go Report Card](https://goreportcard.com/badge/github.com/amberpixels/k1)](https://goreportcard.com/report/github.com/amberpixels/k1)
 
 ## Overview
 
-Abu is a Go utility library that provides helper functions for type casting, reflection, and other common programming tasks. It's designed to make your code more concise and readable, especially in testing scenarios.
+`k1` is a Go utility library that provides helper functions for type casting, reflection, and other common programming tasks. It's designed to make your code more concise and readable, especially in testing scenarios.
 
 ## Installation
 
 ```bash
-go get github.com/amberpixels/abu
+go get github.com/amberpixels/k1
 ```
 
 ## Features
@@ -54,7 +54,7 @@ The `reflectish` package provides helper functions for working with reflection:
 ### Type Casting
 
 ```go
-import "github.com/amberpixels/abu/cast"
+import "github.com/amberpixels/k1/cast"
 
 // Convert a byte slice to a string
 str = cast.AsString([]byte("byte_data")) // "byte_data"
@@ -73,7 +73,7 @@ f := cast.AsFloat(3.14) // "3.14"
 ### Type Checking
 
 ```go
-import "github.com/amberpixels/abu/cast"
+import "github.com/amberpixels/k1/cast"
 
 // Check if a value is a string
 if cast.IsString("example") {
@@ -96,7 +96,7 @@ if cast.IsNil(someValue) {
 ```go
 import (
     "reflect"
-    "github.com/amberpixels/abu/reflect"
+    "github.com/amberpixels/k1/reflect"
 )
 
 // Recursively dereference pointers

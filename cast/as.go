@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/amberpixels/abu/reflectish"
+	"github.com/amberpixels/k1/reflectish"
 )
 
 // AsString converts the given input into a string or a string-like representation.

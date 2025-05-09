@@ -3,7 +3,7 @@ package reflectish_test
 import (
 	"reflect"
 
-	"github.com/amberpixels/abu/reflectish"
+	"github.com/amberpixels/k1/reflectish"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

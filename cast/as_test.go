@@ -3,7 +3,7 @@ package cast_test
 import (
 	"encoding/json"
 
-	cast "github.com/amberpixels/abu/cast"
+	cast "github.com/amberpixels/k1/cast"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

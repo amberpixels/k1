@@ -1,4 +1,4 @@
-module github.com/amberpixels/abu
+module github.com/amberpixels/k1
 
 go 1.23.8
 

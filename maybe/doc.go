@@ -16,7 +16,7 @@
 //
 // Usage:
 //
-//	import "github.com/amberpixels/abu/maybe"
+//	import "github.com/amberpixels/k1/maybe"
 //
 //	opt := maybe.Some(42)
 //	if opt.Some() {
