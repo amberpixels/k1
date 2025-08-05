@@ -9,3 +9,13 @@ func Deref[T any](v *T) T {
 
 	return *v
 }
+
+// Clone returns a shallow copy of the value behind p.
+// Nil in, nil out.
+func Clone[T any](p *T) *T {
+	if p == nil {
+		return nil
+	}
+	c := *p
+	return &c
+}
