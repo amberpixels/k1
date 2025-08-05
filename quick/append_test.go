@@ -216,8 +216,8 @@ func TestAppendEqualsSlowAppend(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			gotQ := quick.Append(tc.a, tc.b...)
 			gotS := SlowAppend(tc.a, tc.b...)
-			fmt.Println(gotQ)
-			fmt.Println(gotS)
+			// fmt.Println(gotQ)
+			// fmt.Println(gotS)
 
 			// Ensure Append matches SlowAppend
 			assert.Equal(

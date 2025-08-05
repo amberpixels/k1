@@ -113,7 +113,7 @@ func init() {
 	ConfigureIsStringConfig()
 }
 
-// clone is done via simple struct-copy (we're fine with this for now)
+// clone is done via simple struct-copy (we're fine with this for now).
 func (cis *isStringConfig) clone() *isStringConfig {
 	var clone = *cis
 	return &clone
