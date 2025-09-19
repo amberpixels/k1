@@ -19,6 +19,7 @@ func (l Lookup[T]) Delete(k T) {
 	delete(l, k)
 }
 
+// Clear removes all the elements from the lookup.
 func (l Lookup[T]) Clear() {
 	for k := range l {
 		delete(l, k)

@@ -13,7 +13,7 @@ func IsNil(a any) bool {
 	v := reflect.ValueOf(a)
 	k := v.Kind()
 	// check if v is OK to be used with IsNil
-	if k == reflect.Ptr || k == reflect.Interface || k == reflect.Chan ||
+	if k == reflect.Pointer || k == reflect.Interface || k == reflect.Chan ||
 		k == reflect.Func || k == reflect.Map || k == reflect.Slice {
 		return v.IsNil()
 	}

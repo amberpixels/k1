@@ -1,6 +1,7 @@
 package ptr
 
-// Deref returns values under the pointer or zero value in case of nil
+// Deref is the safe equivalent of * operator.
+// It returns values under the pointer or zero value in case of nil.
 func Deref[T any](v *T) T {
 	if v == nil {
 		var empty T

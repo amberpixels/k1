@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// JoinStringers joins given stringers into a single string.
 func JoinStringers[T fmt.Stringer](vals []T, sep string) string {
 	if len(vals) == 0 {
 		return ""
