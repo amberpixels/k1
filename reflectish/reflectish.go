@@ -11,6 +11,20 @@ func IndirectDeep(v reflect.Value) reflect.Value {
 	return v
 }
 
+// Interface is the panic-safe equivalent of reflect.Value.Interface.
+//
+// reflect.Value.Interface panics on the zero (invalid) Value — which is exactly
+// what IndirectDeep yields when it dereferences through a nil pointer. Interface
+// returns nil for an invalid Value instead, so the two compose cleanly:
+//
+//	v := reflectish.Interface(reflectish.IndirectDeep(rv)) // nil for nil pointers
+func Interface(v reflect.Value) any {
+	if !v.IsValid() {
+		return nil
+	}
+	return v.Interface()
+}
+
 // LengthOf returns length of a given type.
 func LengthOf(a any) (int, bool) {
 	if a == nil {

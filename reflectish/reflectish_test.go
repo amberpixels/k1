@@ -41,6 +41,28 @@ var _ = Describe("Reflect", func() {
 		})
 	})
 
+	Context("Interface", func() {
+		It("should return the underlying value for a valid value", func() {
+			Expect(reflectish.Interface(reflect.ValueOf("test"))).To(Equal("test"))
+			Expect(reflectish.Interface(reflect.ValueOf(42))).To(Equal(42))
+		})
+
+		It("should return nil for the invalid (zero) value", func() {
+			Expect(reflectish.Interface(reflect.Value{})).To(BeNil())
+		})
+
+		It("should return nil when composed with IndirectDeep over a nil pointer", func() {
+			var p *int
+			Expect(reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(BeNil())
+		})
+
+		It("should return the pointed-at value when composed with IndirectDeep", func() {
+			n := 7
+			p := &n
+			Expect(reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(Equal(7))
+		})
+	})
+
 	Context("LengthOf", func() {
 		It("should return the correct length for a string", func() {
 			str := "test"
