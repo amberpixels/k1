@@ -3,6 +3,7 @@
 // It offers:
 //   - IndirectDeep: recursively dereferences pointers until a non-pointer value is reached.
 //   - Interface: the panic-safe form of reflect.Value.Interface (nil for the invalid Value).
+//   - IndirectInterface: deeply dereferences pointers and returns the value as any (nil through nil pointers).
 //   - LengthOf: returns the length of supported types (arrays, slices, maps, strings, channels),
 //     along with a boolean indicating support.
 //

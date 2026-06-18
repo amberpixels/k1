@@ -63,6 +63,24 @@ var _ = Describe("Reflect", func() {
 		})
 	})
 
+	Context("IndirectInterface", func() {
+		It("should return the value as-is for a non-pointer", func() {
+			Expect(reflectish.IndirectInterface(reflect.ValueOf("test"))).To(Equal("test"))
+		})
+
+		It("should dereference through nested pointers", func() {
+			n := 7
+			p := &n
+			pp := &p
+			Expect(reflectish.IndirectInterface(reflect.ValueOf(pp))).To(Equal(7))
+		})
+
+		It("should return nil for a nil pointer", func() {
+			var p *int
+			Expect(reflectish.IndirectInterface(reflect.ValueOf(p))).To(BeNil())
+		})
+	})
+
 	Context("LengthOf", func() {
 		It("should return the correct length for a string", func() {
 			str := "test"

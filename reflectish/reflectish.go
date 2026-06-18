@@ -25,6 +25,13 @@ func Interface(v reflect.Value) any {
 	return v.Interface()
 }
 
+// IndirectInterface deeply dereferences pointers and returns the underlying
+// value as any, yielding nil when it dereferences through a nil pointer. It is
+// shorthand for Interface(IndirectDeep(v)).
+func IndirectInterface(v reflect.Value) any {
+	return Interface(IndirectDeep(v))
+}
+
 // LengthOf returns length of a given type.
 func LengthOf(a any) (int, bool) {
 	if a == nil {
