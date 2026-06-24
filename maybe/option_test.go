@@ -3,83 +3,202 @@ package maybe_test
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/amberpixels/k1/maybe"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/expectto/be"
+	"github.com/expectto/be/be_reflected"
 )
 
 func TestNoneAndSomeMethods(t *testing.T) {
-	// Create a None maybe for int.
 	optNone := maybe.None[int]()
-	assert.True(t, optNone.None(), "Option should be None")
-	assert.False(t, optNone.Some(), "Some() should be false for a None Option")
-	assert.False(t, optNone.Some(42), "Some() should be false for a None Option")
+	be.Expect(t, optNone.None()).To(be.True())
+	be.Expect(t, optNone.Some()).To(be.False())
+	be.Expect(t, optNone.Some(42)).To(be.False())
 
-	// Create a Some maybe using the helper.
 	optSome := maybe.Some(42)
-	assert.False(t, optSome.None(), "Option should not be None")
-	assert.True(t, optSome.Some(), "Some() should return true when value is present")
-	assert.True(t, optSome.Some(42), "Some(x) should return true when the value equals x")
-	assert.False(t, optSome.Some(100), "Some(x) should return false when the value does not equal x")
+	be.Expect(t, optSome.None()).To(be.False())
+	be.Expect(t, optSome.Some()).To(be.True())
+	be.Expect(t, optSome.Some(42)).To(be.True())
+	be.Expect(t, optSome.Some(100)).To(be.False())
+}
+
+func TestSomePanicsWithMultipleArgs(t *testing.T) {
+	opt := maybe.Some(42)
+	be.Expect(t, func() { opt.Some(1, 2) }).To(be.Panic())
 }
 
 func TestUnwrap(t *testing.T) {
 	optSome := maybe.Some("hello")
-	// Unwrap returns the contained value when present.
-	assert.Equal(t, "hello", optSome.Unwrap(), "Unwrap should return the contained value")
+	be.Expect(t, optSome.Unwrap()).To(be.Eq("hello"))
 
-	// Unwrap on a None should panic.
 	optNone := maybe.None[string]()
-	assert.Panics(t, func() { optNone.Unwrap() }, "Unwrap should panic on a None Option")
+	be.Expect(t, func() { optNone.Unwrap() }).To(be.Panic())
 }
 
 func TestJSONMarshalling(t *testing.T) {
-	// Test marshalling of a Some maybe.
 	optSome := maybe.Some(100)
 	marshalledSome, err := json.Marshal(optSome)
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, string(marshalledSome)).To(be.Eq("100"))
 
-	require.NoError(t, err, "Marshalling Some should not error")
-	// Since optSome contains an integer, the JSON output should be that integer.
-	assert.Equal(t, "100", string(marshalledSome))
-
-	// Test marshalling of a None maybe.
 	optNone := maybe.None[int]()
-	marshalledNone, err := json.Marshal(&optNone) // should work with a pointer as well
-	require.NoError(t, err, "Marshalling None should not error")
-	assert.Equal(t, "null", string(marshalledNone))
-
-	// Test unmarshalling into a Some maybe.
-	var optUnmarshalled maybe.Option[int]
-	err = json.Unmarshal([]byte("123"), &optUnmarshalled)
-	require.NoError(t, err, "Unmarshalling valid JSON should not error")
-	assert.True(t, optUnmarshalled.Some(), "Option should have a value after unmarshalling")
-	assert.True(t, optUnmarshalled.Some(123), "Unmarshalled value should be equal to 123")
-
-	// Test unmarshalling null into an Option.
-	err = json.Unmarshal([]byte("null"), &optUnmarshalled)
-	require.NoError(t, err, "Unmarshalling JSON null should not error")
-	assert.True(t, optUnmarshalled.None(), "Option should be None after unmarshalling null")
+	marshalledNone, err := json.Marshal(&optNone) // pointer receiver works too
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, string(marshalledNone)).To(be.Eq("null"))
 }
 
-func TestUnmarshalText(t *testing.T) {
-	// For testing UnmarshalText, we'll use Option[string] since the string
-	// works directly with json.Unmarshal in our fallback.
+func TestJSONUnmarshalling(t *testing.T) {
+	var opt maybe.Option[int]
+
+	err := json.Unmarshal([]byte("123"), &opt)
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.Some()).To(be.True())
+	be.Expect(t, opt.Some(123)).To(be.True())
+
+	err = json.Unmarshal([]byte("null"), &opt)
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.None()).To(be.True())
+}
+
+func TestJSONUnmarshallingError(t *testing.T) {
+	var opt maybe.Option[int]
+	// "abc" is not valid JSON for an int -> the inner json.Unmarshal must error.
+	err := opt.UnmarshalJSON([]byte(`"abc"`))
+	be.Expect(t, err).To(be.HaveOccurred())
+}
+
+func TestMarshalTOML(t *testing.T) {
+	// Some encodes to the underlying value.
+	optSome := maybe.Some(7)
+	data, err := optSome.MarshalTOML()
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, string(data)).To(be.Eq("7"))
+
+	// None encodes to the TomlNone sentinel (as a JSON string).
+	optNone := maybe.None[int]()
+	data, err = optNone.MarshalTOML()
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, string(data)).To(be.Eq(`"` + maybe.TomlNone + `"`))
+}
+
+func TestUnmarshalTextScalarString(t *testing.T) {
 	var opt maybe.Option[string]
 
-	// Test with non-null text.
 	err := opt.UnmarshalText([]byte(`"test"`))
-	require.NoError(t, err, "UnmarshalText with valid text should not error")
-	assert.True(t, opt.Some(), "Option should have a value")
-	assert.True(t, opt.Some("test"), "Option should contain the value 'test'")
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.Some()).To(be.True())
+	be.Expect(t, opt.Some("test")).To(be.True())
+}
 
-	// Test with empty text.
-	err = opt.UnmarshalText([]byte(""))
-	require.NoError(t, err, "UnmarshalText with empty text should not error")
-	assert.True(t, opt.None(), "Option should be None when given an empty string")
+func TestUnmarshalTextScalarBool(t *testing.T) {
+	var opt maybe.Option[bool]
 
-	// Test with the string "null" (case-insensitive).
-	err = opt.UnmarshalText([]byte("NULL"))
-	require.NoError(t, err, "UnmarshalText with 'NULL' should not error")
-	assert.True(t, opt.None(), "Option should be None when given 'NULL'")
+	err := opt.UnmarshalText([]byte("true"))
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.Some(true)).To(be.True())
+}
+
+func TestUnmarshalTextScalarFloat(t *testing.T) {
+	var opt maybe.Option[float64]
+
+	err := opt.UnmarshalText([]byte("3.14"))
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.Some(3.14)).To(be.True())
+}
+
+func TestUnmarshalTextNoneVariants(t *testing.T) {
+	cases := []string{"", "   ", "null", "NULL", "None", "none", maybe.TomlNone}
+	for _, in := range cases {
+		var opt maybe.Option[string]
+		err := opt.UnmarshalText([]byte(in))
+		be.Expect(t, err).To(be.Succeed())
+		be.Expect(t, opt.None()).To(be.True())
+	}
+}
+
+func TestUnmarshalTextViaTextUnmarshaler(t *testing.T) {
+	// time.Time implements encoding.TextUnmarshaler and is comparable,
+	// so it exercises the TextUnmarshaler branch.
+	var opt maybe.Option[time.Time]
+	err := opt.UnmarshalText([]byte("2020-01-02T03:04:05Z"))
+	be.Expect(t, err).To(be.Succeed())
+	be.Expect(t, opt.Some()).To(be.True())
+
+	want, _ := time.Parse(time.RFC3339, "2020-01-02T03:04:05Z")
+	be.Expect(t, opt.Unwrap().Equal(want)).To(be.True())
+}
+
+func TestUnmarshalTextTextUnmarshalerError(t *testing.T) {
+	var opt maybe.Option[time.Time]
+	err := opt.UnmarshalText([]byte("not-a-time"))
+	be.Expect(t, err).To(be.HaveOccurred())
+}
+
+func TestUnmarshalTextScalarJSONError(t *testing.T) {
+	// float64 takes the scalar branch; "abc" is invalid JSON -> error.
+	var opt maybe.Option[float64]
+	err := opt.UnmarshalText([]byte("abc"))
+	be.Expect(t, err).To(be.HaveOccurred())
+}
+
+func TestUnmarshalTextUnsupportedType(t *testing.T) {
+	// int is comparable, not a TextUnmarshaler, and not in the scalar switch
+	// (only float64/string/bool are) -> the final "no fallback" error.
+	var opt maybe.Option[int]
+	err := opt.UnmarshalText([]byte("5"))
+	be.Expect(t, err).To(be.HaveOccurred())
+}
+
+func TestIsZero(t *testing.T) {
+	// None is zero.
+	optNone := maybe.None[int]()
+	be.Expect(t, optNone.IsZero()).To(be.True())
+
+	// Some(zero value) is also zero.
+	optZero := maybe.Some(0)
+	be.Expect(t, optZero.IsZero()).To(be.True())
+
+	// Some(non-zero) is not zero.
+	optSome := maybe.Some(42)
+	be.Expect(t, optSome.IsZero()).To(be.False())
+}
+
+func TestBoolHelpers(t *testing.T) {
+	tru := maybe.True()
+	be.Expect(t, tru.Some(true)).To(be.True())
+
+	fls := maybe.False()
+	be.Expect(t, fls.Some(false)).To(be.True())
+
+	nb := maybe.NoneBool()
+	be.Expect(t, nb.None()).To(be.True())
+
+	// Bool is an alias for Option[bool].
+	b := maybe.True()
+	be.Expect(t, b.Some()).To(be.True())
+}
+
+func TestIntHelpers(t *testing.T) {
+	ni := maybe.NoneInt()
+	be.Expect(t, ni.None()).To(be.True())
+
+	i := maybe.Some(5)
+	be.Expect(t, i.Some(5)).To(be.True())
+}
+
+// TestReflectedAndSanity exercises a couple of `be` subpackage matchers so the
+// dogfooding covers more than just be.Eq, and double-checks be.NotPanic.
+func TestReflectedAndSanity(t *testing.T) {
+	optSome := maybe.Some("hi")
+	be.Expect(t, optSome.Unwrap()).To(be_reflected.AsString())
+
+	be.Expect(t, func() {
+		o := maybe.Some(1)
+		_ = o.Unwrap()
+	}).To(be.NotPanic())
+
+	// HaveLength on the marshalled bytes of a None.
+	data, _ := maybe.None[int]().MarshalJSON()
+	be.Expect(t, string(data)).To(be.HaveLength(4)) // "null"
 }

@@ -446,7 +446,9 @@ func AsTime(a any) time.Time {
 		// Use Convert (not a type assertion): a custom type whose underlying type
 		// is time.Time is convertible, but its dynamic type is not time.Time, so a
 		// direct assertion would fail and silently yield the zero time.
-		return v.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time)
+		// The assertion below always succeeds because we converted to time.Time.
+		t, _ := v.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time)
+		return t
 	}
 
 	panic(fmt.Sprintf("Expected a time.Time value! Got <%T>: %#v", a, a))

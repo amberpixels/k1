@@ -1,13 +1,6 @@
 package cast_test
 
-import (
-	"testing"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-)
-
-func TestCast(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cast Suite")
-}
+// This file previously bootstrapped a Ginkgo suite. The cast package tests now
+// use the standard library `testing` runner together with the native
+// github.com/expectto/be assertion runner (be.Expect / be.Require), so no suite
+// bootstrap is required anymore.
