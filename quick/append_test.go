@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/amberpixels/k1/quick"
-	"github.com/stretchr/testify/assert"
+	"github.com/expectto/be"
 )
 
 func TestAppend(t *testing.T) {
@@ -79,19 +79,19 @@ func TestAppend(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := quick.Append(tt.a, tt.b...)
-			assert.Equal(t, tt.expected, result, "Append result should match expected value")
+			be.Expect(t, result).To(be.Eq(tt.expected))
 
 			// Verify that the function doesn't modify the original slices
 			if len(tt.a) > 0 {
 				originalA := make([]int, len(tt.a))
 				copy(originalA, tt.a)
-				assert.Equal(t, originalA, tt.a, "Original slice 'a' should not be modified")
+				be.Expect(t, tt.a).To(be.Eq(originalA))
 			}
 
 			if len(tt.b) > 0 {
 				originalB := make([]int, len(tt.b))
 				copy(originalB, tt.b)
-				assert.Equal(t, originalB, tt.b, "Original slice 'b' should not be modified")
+				be.Expect(t, tt.b).To(be.Eq(originalB))
 			}
 		})
 	}
@@ -128,7 +128,7 @@ func TestAppendWithStrings(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := quick.Append(tt.a, tt.b...)
-			assert.Equal(t, tt.expected, result, "Append result should match expected value")
+			be.Expect(t, result).To(be.Eq(tt.expected))
 		})
 	}
 }
@@ -140,8 +140,9 @@ func TestAppendBehavior(t *testing.T) {
 		b := []int{4, 5, 6}
 		result := quick.Append(a, b...)
 
-		// Result should have exactly the capacity needed
-		assert.Equal(t, len(result), cap(result), "Result capacity should match its length")
+		// Result should have exactly the capacity needed.
+		// be has no cap() matcher, so compare via HaveLength against the cap.
+		be.Expect(t, result).To(be.HaveLength(cap(result)))
 	})
 
 	t.Run("result is independent of original slices", func(t *testing.T) {
@@ -158,7 +159,7 @@ func TestAppendBehavior(t *testing.T) {
 		}
 
 		// Result should remain unchanged
-		assert.Equal(t, []int{1, 2, 3, 4, 5, 6}, result, "Result should be independent of original slices")
+		be.Expect(t, result).To(be.Eq([]int{1, 2, 3, 4, 5, 6}))
 	})
 }
 
@@ -220,22 +221,10 @@ func TestAppendEqualsSlowAppend(t *testing.T) {
 			// fmt.Println(gotS)
 
 			// Ensure Append matches SlowAppend
-			assert.Equal(
-				t,
-				gotS,
-				gotQ,
-				"Append and SlowAppend differ for A=%v, B=%v",
-				tc.a, tc.b,
-			)
+			be.Expect(t, gotQ).To(be.Eq(gotS))
 
 			// Ensure they match the expected slice
-			assert.Equal(
-				t,
-				tc.want,
-				gotQ,
-				"Result incorrect for A=%v, B=%v",
-				tc.a, tc.b,
-			)
+			be.Expect(t, gotQ).To(be.Eq(tc.want))
 		})
 	}
 }

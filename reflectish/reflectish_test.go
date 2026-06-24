@@ -2,131 +2,134 @@ package reflectish_test
 
 import (
 	"reflect"
+	"testing"
 
 	"github.com/amberpixels/k1/reflectish"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/expectto/be"
+	"github.com/expectto/be/be_reflected"
 )
 
-var _ = Describe("Reflect", func() {
-	Context("IndirectDeep", func() {
-		It("should return the same value for non-pointer value", func() {
-			str := "test"
-			v := reflect.ValueOf(str)
-			result := reflectish.IndirectDeep(v)
+func TestIndirectDeep(t *testing.T) {
+	t.Run("returns the same value for a non-pointer value", func(t *testing.T) {
+		str := "test"
+		result := reflectish.IndirectDeep(reflect.ValueOf(str))
 
-			Expect(result.Kind()).To(Equal(reflect.String))
-			Expect(result.String()).To(Equal("test"))
-		})
-
-		It("should dereference a single pointer", func() {
-			str := "test"
-			strPtr := &str
-			v := reflect.ValueOf(strPtr)
-			result := reflectish.IndirectDeep(v)
-
-			Expect(result.Kind()).To(Equal(reflect.String))
-			Expect(result.String()).To(Equal("test"))
-		})
-
-		It("should dereference a double pointer", func() {
-			str := "test"
-			strPtr := &str
-			strPtrPtr := &strPtr
-			v := reflect.ValueOf(strPtrPtr)
-			result := reflectish.IndirectDeep(v)
-
-			Expect(result.Kind()).To(Equal(reflect.String))
-			Expect(result.String()).To(Equal("test"))
-		})
+		be.Expect(t, result.Kind()).To(be.Eq(reflect.String))
+		// The indirected value is a string under reflection.
+		be.Expect(t, result.Interface()).To(be_reflected.AsString())
+		be.Expect(t, result.String()).To(be.Eq("test"))
 	})
 
-	Context("Interface", func() {
-		It("should return the underlying value for a valid value", func() {
-			Expect(reflectish.Interface(reflect.ValueOf("test"))).To(Equal("test"))
-			Expect(reflectish.Interface(reflect.ValueOf(42))).To(Equal(42))
-		})
+	t.Run("dereferences a single pointer", func(t *testing.T) {
+		str := "test"
+		strPtr := &str
+		result := reflectish.IndirectDeep(reflect.ValueOf(strPtr))
 
-		It("should return nil for the invalid (zero) value", func() {
-			Expect(reflectish.Interface(reflect.Value{})).To(BeNil())
-		})
-
-		It("should return nil when composed with IndirectDeep over a nil pointer", func() {
-			var p *int
-			Expect(reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(BeNil())
-		})
-
-		It("should return the pointed-at value when composed with IndirectDeep", func() {
-			n := 7
-			p := &n
-			Expect(reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(Equal(7))
-		})
+		be.Expect(t, result.Kind()).To(be.Eq(reflect.String))
+		be.Expect(t, result.String()).To(be.Eq("test"))
 	})
 
-	Context("IndirectInterface", func() {
-		It("should return the value as-is for a non-pointer", func() {
-			Expect(reflectish.IndirectInterface(reflect.ValueOf("test"))).To(Equal("test"))
-		})
+	t.Run("dereferences a double pointer", func(t *testing.T) {
+		str := "test"
+		strPtr := &str
+		strPtrPtr := &strPtr
+		result := reflectish.IndirectDeep(reflect.ValueOf(strPtrPtr))
 
-		It("should dereference through nested pointers", func() {
-			n := 7
-			p := &n
-			pp := &p
-			Expect(reflectish.IndirectInterface(reflect.ValueOf(pp))).To(Equal(7))
-		})
+		be.Expect(t, result.Kind()).To(be.Eq(reflect.String))
+		be.Expect(t, result.String()).To(be.Eq("test"))
+	})
+}
 
-		It("should return nil for a nil pointer", func() {
-			var p *int
-			Expect(reflectish.IndirectInterface(reflect.ValueOf(p))).To(BeNil())
-		})
+func TestInterface(t *testing.T) {
+	t.Run("returns the underlying value for a valid value", func(t *testing.T) {
+		be.Expect(t, reflectish.Interface(reflect.ValueOf("test"))).To(be.Eq("test"))
+		be.Expect(t, reflectish.Interface(reflect.ValueOf("test"))).To(be_reflected.AsString())
+
+		be.Expect(t, reflectish.Interface(reflect.ValueOf(42))).To(be.Eq(42))
+		be.Expect(t, reflectish.Interface(reflect.ValueOf(42))).To(be_reflected.AsInteger())
 	})
 
-	Context("LengthOf", func() {
-		It("should return the correct length for a string", func() {
-			str := "test"
-			length, ok := reflectish.LengthOf(str)
-
-			Expect(ok).To(BeTrue())
-			Expect(length).To(Equal(4))
-		})
-
-		It("should return the correct length for a slice", func() {
-			slice := []int{1, 2, 3}
-			length, ok := reflectish.LengthOf(slice)
-
-			Expect(ok).To(BeTrue())
-			Expect(length).To(Equal(3))
-		})
-
-		It("should return the correct length for a map", func() {
-			m := map[string]int{"a": 1, "b": 2}
-			length, ok := reflectish.LengthOf(m)
-
-			Expect(ok).To(BeTrue())
-			Expect(length).To(Equal(2))
-		})
-
-		It("should return the correct length for a channel", func() {
-			ch := make(chan int, 5)
-			length, ok := reflectish.LengthOf(ch)
-
-			Expect(ok).To(BeTrue())
-			Expect(length).To(Equal(0))
-		})
-
-		It("should return false for an unsupported type", func() {
-			i := 42
-			length, ok := reflectish.LengthOf(i)
-
-			Expect(ok).To(BeFalse())
-			Expect(length).To(Equal(0))
-		})
-
-		It("should return false for nil", func() {
-			length, ok := reflectish.LengthOf(nil)
-
-			Expect(ok).To(BeFalse())
-			Expect(length).To(Equal(0))
-		})
+	t.Run("returns nil for the invalid (zero) value", func(t *testing.T) {
+		be.Expect(t, reflectish.Interface(reflect.Value{})).To(be.Nil())
 	})
-})
+
+	t.Run("returns nil when composed with IndirectDeep over a nil pointer", func(t *testing.T) {
+		var p *int
+		be.Expect(t, reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(be.Nil())
+	})
+
+	t.Run("returns the pointed-at value when composed with IndirectDeep", func(t *testing.T) {
+		n := 7
+		p := &n
+		be.Expect(t, reflectish.Interface(reflectish.IndirectDeep(reflect.ValueOf(p)))).To(be.Eq(7))
+	})
+}
+
+func TestIndirectInterface(t *testing.T) {
+	t.Run("returns the value as-is for a non-pointer", func(t *testing.T) {
+		be.Expect(t, reflectish.IndirectInterface(reflect.ValueOf("test"))).To(be.Eq("test"))
+	})
+
+	t.Run("dereferences through nested pointers", func(t *testing.T) {
+		n := 7
+		p := &n
+		pp := &p
+		be.Expect(t, reflectish.IndirectInterface(reflect.ValueOf(pp))).To(be.Eq(7))
+		be.Expect(t, reflectish.IndirectInterface(reflect.ValueOf(pp))).To(be_reflected.AsInteger())
+	})
+
+	t.Run("returns nil for a nil pointer", func(t *testing.T) {
+		var p *int
+		be.Expect(t, reflectish.IndirectInterface(reflect.ValueOf(p))).To(be.Nil())
+	})
+}
+
+func TestLengthOf(t *testing.T) {
+	t.Run("returns the correct length for a string", func(t *testing.T) {
+		length, ok := reflectish.LengthOf("test")
+
+		be.Expect(t, ok).To(be.True())
+		be.Expect(t, length).To(be.Eq(4))
+	})
+
+	t.Run("returns the correct length for a slice", func(t *testing.T) {
+		slice := []int{1, 2, 3}
+		length, ok := reflectish.LengthOf(slice)
+
+		be.Expect(t, ok).To(be.True())
+		be.Expect(t, length).To(be.Eq(3))
+		// Cross-check via the native HaveLength matcher on the slice itself.
+		be.Expect(t, slice).To(be.HaveLength(3))
+	})
+
+	t.Run("returns the correct length for a map", func(t *testing.T) {
+		m := map[string]int{"a": 1, "b": 2}
+		length, ok := reflectish.LengthOf(m)
+
+		be.Expect(t, ok).To(be.True())
+		be.Expect(t, length).To(be.Eq(2))
+		be.Expect(t, m).To(be.HaveLength(2))
+	})
+
+	t.Run("returns the correct length for a channel", func(t *testing.T) {
+		ch := make(chan int, 5)
+		length, ok := reflectish.LengthOf(ch)
+
+		be.Expect(t, ok).To(be.True())
+		be.Expect(t, length).To(be.Eq(0))
+	})
+
+	t.Run("returns false for an unsupported type", func(t *testing.T) {
+		length, ok := reflectish.LengthOf(42)
+
+		be.Expect(t, ok).To(be.False())
+		be.Expect(t, length).To(be.Eq(0))
+	})
+
+	t.Run("returns false for nil", func(t *testing.T) {
+		length, ok := reflectish.LengthOf(nil)
+
+		be.Expect(t, ok).To(be.False())
+		be.Expect(t, length).To(be.Eq(0))
+	})
+}

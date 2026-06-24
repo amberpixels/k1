@@ -1,121 +1,96 @@
 package cast_test
 
 import (
+	"testing"
+	"time"
+
 	cast "github.com/amberpixels/k1/cast"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/expectto/be"
 )
 
-var _ = Describe("Is", func() {
-	Context("IsNil", func() {
-		It("should return true for nil", func() {
-			Expect(cast.IsNil(nil)).To(BeTrue())
-		})
-		It("should return true for typed nil", func() {
-			var i *int
-			Expect(cast.IsNil(i)).To(BeTrue())
-		})
-		It("should return true for interface nil", func() {
-			var i interface{}
-			Expect(cast.IsNil(i)).To(BeTrue())
-		})
+func TestIsNil(t *testing.T) {
+	be.Expect(t, cast.IsNil(nil)).To(be.Eq(true))
 
-		It("should return false for non-nil pointer", func() {
-			Expect(cast.IsNil(&struct{}{})).To(BeFalse())
-		})
-		It("should return false for non-nil map", func() {
-			Expect(cast.IsNil(map[string]int{})).To(BeFalse())
-		})
-		It("should return false for non-nil func", func() {
-			Expect(cast.IsNil(func() {})).To(BeFalse())
-		})
+	var ip *int
+	be.Expect(t, cast.IsNil(ip)).To(be.Eq(true))
 
-		It("should return false for non-nil digit", func() {
-			Expect(cast.IsNil(0)).To(BeFalse())
-		})
-		It("should return false for non-nil string", func() {
-			Expect(cast.IsNil("")).To(BeFalse())
-		})
-	})
+	var iface any
+	be.Expect(t, cast.IsNil(iface)).To(be.Eq(true))
 
-	Context("IsStringish", func() {
-		When("considered stringish", func() {
-			It("should return true for string", func() {
-				Expect(cast.IsStringish("something")).To(BeTrue())
-			})
-			It("should return true for empty string", func() {
-				Expect(cast.IsStringish("")).To(BeTrue())
-			})
-			It("should return true for []byte", func() {
-				Expect(cast.IsStringish([]byte("foobar"))).To(BeTrue())
-			})
-			It("should return true for empty []byte", func() {
-				Expect(cast.IsStringish([]byte{})).To(BeTrue())
-			})
-		})
+	var m map[string]int
+	be.Expect(t, cast.IsNil(m)).To(be.Eq(true))
 
-		When("considered not stringish", func() {
-			It("should return false for nil", func() {
-				Expect(cast.IsStringish(nil)).To(BeFalse())
-			})
-			It("should return false for int", func() {
-				Expect(cast.IsStringish(123)).To(BeFalse())
-			})
-			It("should return false for float", func() {
-				Expect(cast.IsStringish(123.456)).To(BeFalse())
-			})
-			It("should return false for bool", func() {
-				Expect(cast.IsStringish(true)).To(BeFalse())
-			})
-			It("should return false for complex", func() {
-				Expect(cast.IsStringish(1 + 2i)).To(BeFalse())
-			})
-			It("should return false for struct", func() {
-				Expect(cast.IsStringish(struct{}{})).To(BeFalse())
-			})
-			It("should return false for map", func() {
-				Expect(cast.IsStringish(map[string]int{})).To(BeFalse())
-			})
-			It("should return false for func", func() {
-				Expect(cast.IsStringish(func() {})).To(BeFalse())
-			})
-		})
-	})
+	var s []int
+	be.Expect(t, cast.IsNil(s)).To(be.Eq(true))
 
-	Context("IsInt", func() {
-		It("should return true for int", func() {
-			Expect(cast.IsInt(123)).To(BeTrue())
-		})
-		It("should return true for int8", func() {
-			Expect(cast.IsInt(int8(123))).To(BeTrue())
-		})
-		It("should return true for int16", func() {
-			Expect(cast.IsInt(int16(123))).To(BeTrue())
-		})
-		It("should return true for int32", func() {
-			Expect(cast.IsInt(int32(123))).To(BeTrue())
-		})
-		It("should return true for int64", func() {
-			Expect(cast.IsInt(int64(123))).To(BeTrue())
-		})
-		It("should return true for uint", func() {
-			Expect(cast.IsInt(uint(123))).To(BeTrue())
-		})
+	var fn func()
+	be.Expect(t, cast.IsNil(fn)).To(be.Eq(true))
 
-		It("should return false for float", func() {
-			Expect(cast.IsInt(123.456)).To(BeFalse())
-		})
-		It("should return false for string", func() {
-			Expect(cast.IsInt("123")).To(BeFalse())
-		})
-		It("should return false for bool", func() {
-			Expect(cast.IsInt(true)).To(BeFalse())
-		})
-		It("should return false for nil", func() {
-			Expect(cast.IsInt(nil)).To(BeFalse())
-		})
-		It("should return false for struct", func() {
-			Expect(cast.IsInt(struct{}{})).To(BeFalse())
-		})
-	})
-})
+	var ch chan int
+	be.Expect(t, cast.IsNil(ch)).To(be.Eq(true))
+
+	// non-nil cases
+	be.Expect(t, cast.IsNil(&struct{}{})).To(be.Eq(false))
+	be.Expect(t, cast.IsNil(map[string]int{})).To(be.Eq(false))
+	be.Expect(t, cast.IsNil(func() {})).To(be.Eq(false))
+	be.Expect(t, cast.IsNil(0)).To(be.Eq(false))
+	be.Expect(t, cast.IsNil("")).To(be.Eq(false))
+}
+
+func TestIsStringish(t *testing.T) {
+	// stringish values
+	be.Expect(t, cast.IsStringish("something")).To(be.Eq(true))
+	be.Expect(t, cast.IsStringish("")).To(be.Eq(true))
+	be.Expect(t, cast.IsStringish([]byte("foobar"))).To(be.Eq(true))
+	be.Expect(t, cast.IsStringish([]byte{})).To(be.Eq(true))
+	be.Expect(t, cast.IsStringish(customString("x"))).To(be.Eq(true))
+
+	// not stringish
+	be.Expect(t, cast.IsStringish(nil)).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(123)).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(123.456)).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(true)).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(1+2i)).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(struct{}{})).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(map[string]int{})).To(be.Eq(false))
+	be.Expect(t, cast.IsStringish(func() {})).To(be.Eq(false))
+}
+
+func TestIsInt(t *testing.T) {
+	be.Expect(t, cast.IsInt(123)).To(be.Eq(true))
+	be.Expect(t, cast.IsInt(int8(1))).To(be.Eq(true))
+	be.Expect(t, cast.IsInt(int16(1))).To(be.Eq(true))
+	be.Expect(t, cast.IsInt(int32(1))).To(be.Eq(true))
+	be.Expect(t, cast.IsInt(int64(1))).To(be.Eq(true))
+	be.Expect(t, cast.IsInt(uint(1))).To(be.Eq(true))
+	// integral floats are considered ints
+	be.Expect(t, cast.IsInt(42.0)).To(be.Eq(true))
+
+	// not ints
+	be.Expect(t, cast.IsInt(123.456)).To(be.Eq(false))
+	be.Expect(t, cast.IsInt("123")).To(be.Eq(false))
+	be.Expect(t, cast.IsInt(true)).To(be.Eq(false))
+	be.Expect(t, cast.IsInt(nil)).To(be.Eq(false))
+	be.Expect(t, cast.IsInt(struct{}{})).To(be.Eq(false))
+}
+
+func TestIsStrings(t *testing.T) {
+	be.Expect(t, cast.IsStrings([]string{"a", "b"})).To(be.True())
+	be.Expect(t, cast.IsStrings([]customString{"a"})).To(be.True())
+
+	be.Expect(t, cast.IsStrings("not a slice")).To(be.False())
+	be.Expect(t, cast.IsStrings(nil)).To(be.False())
+
+	// []int is rune-convertible to string but is NOT a slice of strings.
+	be.Expect(t, cast.IsStrings([]int{1, 2})).To(be.False())
+}
+
+func TestIsTime(t *testing.T) {
+	be.Expect(t, cast.IsTime(time.Now())).To(be.Eq(true))
+
+	n := time.Now()
+	be.Expect(t, cast.IsTime(&n)).To(be.Eq(true))
+
+	be.Expect(t, cast.IsTime("not a time")).To(be.Eq(false))
+	be.Expect(t, cast.IsTime(123)).To(be.Eq(false))
+}

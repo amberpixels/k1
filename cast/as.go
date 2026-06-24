@@ -396,14 +396,18 @@ func AsStrings(v any) []string {
 	// Then fallback to reflect
 	rv := reflect.ValueOf(v)
 	rv = reflectish.IndirectDeep(rv)
-	st := reflect.TypeOf("")
 
 	// todo: support arrays?
 	if rv.Kind() == reflect.Slice {
 		slice := make([]string, rv.Len())
 		for i := 0; i < rv.Len(); i++ {
-			if !rv.Index(i).Type().ConvertibleTo(st) {
-				panic(fmt.Sprintf("expected a slice string! Got s[%d] <%T>: %#v", i, v, v))
+			// Must be a string-kind element (string or a custom type whose
+			// underlying type is string). ConvertibleTo(string) is too permissive:
+			// integers are convertible to string (rune conversion), but
+			// reflect.Value.String() on a non-string Kind yields the "<int Value>"
+			// placeholder rather than a real conversion.
+			if rv.Index(i).Kind() != reflect.String {
+				panic(fmt.Sprintf("expected a slice of strings! Got s[%d] <%T>: %#v", i, v, v))
 			}
 
 			slice[i] = rv.Index(i).String()
@@ -439,7 +443,11 @@ func AsTime(a any) time.Time {
 	v = reflectish.IndirectDeep(v)
 
 	if v.CanConvert(reflect.TypeFor[time.Time]()) {
-		t, _ := v.Interface().(time.Time)
+		// Use Convert (not a type assertion): a custom type whose underlying type
+		// is time.Time is convertible, but its dynamic type is not time.Time, so a
+		// direct assertion would fail and silently yield the zero time.
+		// The assertion below always succeeds because we converted to time.Time.
+		t, _ := v.Convert(reflect.TypeFor[time.Time]()).Interface().(time.Time)
 		return t
 	}
 

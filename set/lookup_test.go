@@ -4,20 +4,29 @@ import (
 	"testing"
 
 	"github.com/amberpixels/k1/set"
-	"github.com/stretchr/testify/assert"
+	"github.com/expectto/be"
 )
 
-// TestNewLookupAndFill.
+// TestNewLookupEmpty verifies an empty lookup reports no membership.
+func TestNewLookupEmpty(t *testing.T) {
+	l := set.NewLookup[string]()
+
+	be.Expect(t, l).To(be.Not(be.HaveKey("a")))
+	be.Expect(t, l).To(be.Not(be.HaveKey("b")))
+	be.Expect(t, l).To(be.HaveLength(0))
+}
+
+// TestNewLookupAndFill verifies adding into an initially-empty lookup.
 func TestNewLookupAndFill(t *testing.T) {
 	l := set.NewLookup[string]()
 
-	assert.False(t, l.Has("a"))
-	assert.False(t, l.Has("b"))
+	be.Expect(t, l).To(be.Not(be.HaveKey("a")))
 
 	l.Add("a")
 
-	assert.True(t, l.Has("a"))
-	assert.False(t, l.Has("b"))
+	be.Expect(t, l).To(be.HaveKey("a"))
+	be.Expect(t, l).To(be.Not(be.HaveKey("b")))
+	be.Expect(t, l).To(be.HaveLength(1))
 }
 
 // TestNewLookupAndHas tests that NewLookup correctly initializes a lookup and Has
@@ -25,32 +34,116 @@ func TestNewLookupAndFill(t *testing.T) {
 func TestNewLookupAndHas(t *testing.T) {
 	l := set.NewLookup("a", "b", "c")
 
-	assert.True(t, l.Has("a"), "Expected key 'a' to be present")
-	assert.True(t, l.Has("b"), "Expected key 'b' to be present")
-	assert.True(t, l.Has("c"), "Expected key 'c' to be present")
-	assert.False(t, l.Has("d"), "Expected key 'd' to not be present")
+	be.Expect(t, l).To(be.HaveLength(3))
+	be.Expect(t, l).To(be.HaveKey("a"))
+	be.Expect(t, l).To(be.HaveKey("b"))
+	be.Expect(t, l).To(be.HaveKey("c"))
+	be.Expect(t, l).To(be.Not(be.HaveKey("d")))
 }
 
-// TestAdd tests that the Add function correctly inserts a new key.
+// TestHas exercises the Has method directly, asserting the returned bool with
+// be.True/be.False.
+func TestHas(t *testing.T) {
+	l := set.NewLookup("a", "b", "c")
+
+	be.Expect(t, l.Has("a")).To(be.True())
+	be.Expect(t, l.Has("d")).To(be.False())
+}
+
+// TestNewLookupDeduplicates verifies that repeated initial keys collapse into one.
+func TestNewLookupDeduplicates(t *testing.T) {
+	l := set.NewLookup("a", "a", "b")
+
+	be.Expect(t, l).To(be.HaveLength(2))
+	be.Expect(t, l).To(be.HaveKey("a"))
+	be.Expect(t, l).To(be.HaveKey("b"))
+}
+
+// TestAdd tests that Add inserts a new key and is idempotent.
 func TestAdd(t *testing.T) {
 	l := set.NewLookup("x")
-	assert.True(t, l.Has("x"), "Expected key 'x' to be present")
+	be.Require(t, l).To(be.HaveKey("x"))
 
-	// Add a new key and verify it was added.
 	l.Add("y")
-	assert.True(t, l.Has("y"), "Expected key 'y' to be present after calling Add")
+	be.Expect(t, l).To(be.HaveKey("y"))
+	be.Expect(t, l).To(be.HaveLength(2))
+
+	// Adding an existing key must not change the length.
+	l.Add("y")
+	be.Expect(t, l).To(be.HaveLength(2))
 }
 
-// TestLookupWithInts demonstrates that the generic Lookup works correctly for int types.
+// TestDelete verifies Delete removes a key and is a no-op for missing keys.
+func TestDelete(t *testing.T) {
+	l := set.NewLookup("a", "b", "c")
+
+	l.Delete("b")
+	be.Expect(t, l).To(be.Not(be.HaveKey("b")))
+	be.Expect(t, l).To(be.HaveKey("a"))
+	be.Expect(t, l).To(be.HaveLength(2))
+
+	// Deleting a non-existent key must be a safe no-op.
+	l.Delete("zzz")
+	be.Expect(t, l).To(be.HaveLength(2))
+}
+
+// TestClear verifies Clear removes every element.
+func TestClear(t *testing.T) {
+	l := set.NewLookup("a", "b", "c")
+	be.Require(t, l).To(be.HaveLength(3))
+
+	l.Clear()
+	be.Expect(t, l).To(be.HaveLength(0))
+	be.Expect(t, l).To(be.Not(be.HaveKey("a")))
+	be.Expect(t, l).To(be.Not(be.HaveKey("b")))
+	be.Expect(t, l).To(be.Not(be.HaveKey("c")))
+
+	// A cleared lookup is still usable.
+	l.Add("z")
+	be.Expect(t, l).To(be.HaveKey("z"))
+	be.Expect(t, l).To(be.HaveLength(1))
+}
+
+// TestNewLookupCapped verifies the capacity-hinted constructor behaves like NewLookup.
+func TestNewLookupCapped(t *testing.T) {
+	l := set.NewLookupCapped(10, "a", "b")
+
+	be.Expect(t, l).To(be.HaveLength(2))
+	be.Expect(t, l).To(be.HaveKey("a"))
+	be.Expect(t, l).To(be.HaveKey("b"))
+	be.Expect(t, l).To(be.Not(be.HaveKey("c")))
+
+	l.Add("c")
+	be.Expect(t, l).To(be.HaveKey("c"))
+	be.Expect(t, l).To(be.HaveLength(3))
+}
+
+// TestNewLookupCappedZeroNoKeys verifies a zero-capacity capped lookup with no
+// initial keys starts empty and remains usable.
+func TestNewLookupCappedZeroNoKeys(t *testing.T) {
+	l := set.NewLookupCapped[int](0)
+
+	be.Expect(t, l).To(be.HaveLength(0))
+
+	l.Add(42)
+	be.Expect(t, l).To(be.HaveKey(42))
+}
+
+// TestLookupWithInts demonstrates the generic Lookup works for int types and the
+// full Add/Has/Delete lifecycle.
 func TestLookupWithInts(t *testing.T) {
 	l := set.NewLookup(1, 2, 3)
 
-	assert.True(t, l.Has(1), "Expected key 1 to be present")
-	assert.True(t, l.Has(2), "Expected key 2 to be present")
-	assert.True(t, l.Has(3), "Expected key 3 to be present")
-	assert.False(t, l.Has(4), "Expected key 4 to not be present")
+	be.Expect(t, l).To(be.HaveLength(3))
+	be.Expect(t, l).To(be.HaveKey(1))
+	be.Expect(t, l).To(be.HaveKey(2))
+	be.Expect(t, l).To(be.HaveKey(3))
+	be.Expect(t, l).To(be.Not(be.HaveKey(4)))
 
-	// Test adding a new integer key.
 	l.Add(4)
-	assert.True(t, l.Has(4), "Expected key 4 to be present after calling Add")
+	be.Expect(t, l).To(be.HaveKey(4))
+
+	l.Delete(1)
+	be.Expect(t, l).To(be.Not(be.HaveKey(1)))
+	be.Expect(t, l).To(be.HaveLength(3))
 }
