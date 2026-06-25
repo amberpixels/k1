@@ -2,8 +2,8 @@ github.com/IGLOU-EU/go-wildcard v1.0.3 h1:r8T46+8/9V1STciXJomTWRpPEv4nGJATDbJkdU
 github.com/IGLOU-EU/go-wildcard v1.0.3/go.mod h1:/qeV4QLmydCbwH0UMQJmXDryrFKJknWi/jjO8IiuQfY=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
-github.com/expectto/be v1.0.0-rc.3 h1:XGspHDugDmbO09EE2mAQDv2YPJpgPb1j/RNGQdd19o8=
-github.com/expectto/be v1.0.0-rc.3/go.mod h1:dnI4Ns2GqoTi99yS67rWFAP9JPWx1d/F+1xrIFJKt6U=
+github.com/expectto/be v1.0.0-rc.6 h1:TgOmKGRf8IypYW5qTkRp/kqyLpvSLxWY/PtESJBQ4a0=
+github.com/expectto/be v1.0.0-rc.6/go.mod h1:dnI4Ns2GqoTi99yS67rWFAP9JPWx1d/F+1xrIFJKt6U=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=

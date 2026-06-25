@@ -2,7 +2,7 @@ module github.com/amberpixels/k1
 
 go 1.26
 
-require github.com/expectto/be v1.0.0-rc.3
+require github.com/expectto/be v1.0.0-rc.6
 
 require (
 	github.com/IGLOU-EU/go-wildcard v1.0.3 // indirect
