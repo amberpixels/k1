@@ -9,7 +9,6 @@
 Type casting, reflection helpers, and everyday utilities for Go.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/amberpixels/k1.svg)](https://pkg.go.dev/github.com/amberpixels/k1)
-[![Go Report Card](https://goreportcard.com/badge/github.com/amberpixels/k1)](https://goreportcard.com/report/github.com/amberpixels/k1)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/amberpixels/k1)](go.mod)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
