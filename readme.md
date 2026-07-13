@@ -1,119 +1,132 @@
-# k1t (k1)
+<p align="center">
+  <img src="logo.svg" alt="k1" width="230">
+</p>
 
-k1t — A Simple Toolkit for Casting, Reflection, and Everyday Go Utilities.
+<div align="center">
+
+### Every gopher needs a k1t.
+
+Type casting, reflection helpers, and everyday utilities for Go.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/amberpixels/k1.svg)](https://pkg.go.dev/github.com/amberpixels/k1)
 [![Go Report Card](https://goreportcard.com/badge/github.com/amberpixels/k1)](https://goreportcard.com/report/github.com/amberpixels/k1)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/amberpixels/k1)](go.mod)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-## Overview
+</div>
 
-`k1` is a Go utility library that provides helper functions for type casting, reflection, and other common programming tasks. It's designed to make your code more concise and readable, especially in testing scenarios.
+---
 
-## Installation
+`k1` (read: "k1t") is a small toolkit of the helpers you keep rewriting between projects: type casting that survives custom types and deep pointers, an Option type, safe pointer dereferencing, and set lookups.
+
+The core idea: try a direct type switch first, fall back to reflection. So `cast` functions accept anything shaped right, not just exact types:
+
+```go
+type UserID string
+id := UserID("u-42")
+p := &id
+
+cast.AsString(id) // "u-42"
+cast.AsString(&p) // "u-42" - pointers are dereferenced deeply
+```
+
+> [!NOTE]
+> `As*` functions panic on impossible conversions instead of returning errors. That is by design: k1 is testing-oriented, and in tests a panic is a failure you want loud.
+
+## Install
 
 ```bash
 go get github.com/amberpixels/k1
 ```
 
-## Features
-
-### Type Casting
-
-The `cast` package provides functions for converting between different types:
-
-- `AsString`: Convert a value to a string
-- `AsBytes`: Convert a value to a byte slice
-- `AsBool`: Convert a value to a boolean
-- `AsInt`: Convert a value to an integer
-- `AsFloat`: Convert a value to a float
-- `AsKind`: Convert a value to a reflect.Kind
-- `AsSliceOfAny`: Convert a value to a slice of any
-- `AsStrings`: Convert a value to a slice of strings
-- `AsTime`: Convert a value to a time.Time
-
-### Type Checking
-
-The `cast` package also provides functions for checking if a value is of a certain type:
-
-- `IsString`: Check if a value is a string (with configurable options)
-- `IsStringish`: Check if a value is string-like
-- `IsNil`: Check if a value is nil
-- `IsInt`: Check if a value is an integer
-- `IsStrings`: Check if a value is a slice of strings
-- `IsTime`: Check if a value is a time.Time
-
-### Reflection Helpers
-
-The `reflectish` package provides helper functions for working with reflection:
-
-- `IndirectDeep`: Recursively dereference pointers
-- `LengthOf`: Get the length of various types (maps, arrays, strings, channels, slices)
-
-## Usage Examples
-
-### Type Casting
+## Quick Start
 
 ```go
-import "github.com/amberpixels/k1/cast"
+package main
 
-// Convert a byte slice to a string
-str = cast.AsString([]byte("byte_data")) // "byte_data"
-
-// Convert a custom string type
-type CustomString string
-str = cast.AsString(CustomString("example")) // "example"
-
-// Convert an integer
-num := cast.AsInt(42) // "42"
-
-// Convert a float
-f := cast.AsFloat(3.14) // "3.14"
-```
-
-### Type Checking
-
-```go
-import "github.com/amberpixels/k1/cast"
-
-// Check if a value is a string
-if cast.IsString("example") {
-    // It's a string
-}
-
-// Check if a value is string-like (string, []byte, etc.)
-if cast.IsStringish([]byte("example")) {
-    // It's string-like
-}
-
-// Check if a value is nil
-if cast.IsNil(someValue) {
-    // It's nil
-}
-```
-
-### Reflection Helpers
-
-```go
 import (
-    "reflect"
-    "github.com/amberpixels/k1/reflect"
+	"fmt"
+
+	"github.com/amberpixels/k1/cast"
+	"github.com/amberpixels/k1/maybe"
+	"github.com/amberpixels/k1/ptr"
+	"github.com/amberpixels/k1/set"
 )
 
-// Recursively dereference pointers
-v := reflect.ValueOf(&someValue)
-v = reflectish.IndirectDeep(v)
+type UserID string
 
-// Get the length of a value
-length, ok := reflectish.LengthOf(someValue)
-if ok {
-    // Length is available
+func main() {
+	// cast: conversions that survive custom types and pointers
+	id := UserID("u-42")
+	fmt.Println(cast.AsString(&id)) // u-42
+
+	// maybe: Option[T] instead of *T
+	port := maybe.Some(8080)
+	if port.Some() {
+		fmt.Println(port.Unwrap()) // 8080
+	}
+
+	// ptr: dereference with a zero-value fallback
+	var name *string
+	fmt.Printf("%q\n", ptr.Deref(name)) // ""
+
+	// set: map[T]struct{} without the ceremony
+	admins := set.NewLookup("alice", "bob")
+	fmt.Println(admins.Has("mallory")) // false
 }
 ```
 
-## Contributing
+## Casting
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+The `cast` package converts (`As*`) and checks (`Is*`):
+
+```go
+cast.AsString([]byte("data")) // "data"
+cast.AsBytes("data")          // []byte("data")
+cast.AsInt(42.0)              // 42 - integral floats convert; 42.5 panics
+cast.AsFloat(42)              // 42.0
+cast.AsTime(&customTime)      // time.Time, also from custom time types
+```
+
+Full set: `AsString`, `AsBytes`, `AsBool`, `AsInt`, `AsFloat`, `AsTime`, `AsKind`, `AsSliceOfAny`, `AsStrings` - plus `IsString`, `IsStringish`, `IsNil`, `IsInt`, `IsStrings`, `IsTime` for checks.
+
+`IsString` is strict by default (true only for an actual `string`); loosen it per call or globally:
+
+```go
+cast.IsString(UserID("u-42"))                          // false - strict by default
+cast.IsString(UserID("u-42"), cast.AllowCustomTypes()) // true
+cast.IsString([]byte("hi"), cast.AllowAll())           // true - most permissive
+
+cast.ConfigureIsStringConfig(cast.AllowAll()) // change the default globally
+```
+
+## Optionals
+
+The `maybe` package is an `Option[T]` for comparable types, with marshaling that behaves well in configs and APIs:
+
+```go
+port := maybe.Some(8080)
+port.Some()   // true
+port.Unwrap() // 8080; panics on None
+
+none := maybe.None[int]()
+json.Marshal(port) // 8080
+json.Marshal(none) // null
+```
+
+None marshals as `null` in JSON and as the `"None"` sentinel in TOML; text unmarshalling treats empty, `"null"`, and `"None"` as None. Shorthands: `maybe.True()`, `maybe.False()`, `maybe.NoneBool()`, `maybe.NoneInt()`.
+
+## Everyday Helpers
+
+- **`ptr`** - `ptr.Deref(p)` dereferences with a zero-value fallback for nil; `ptr.Clone(p)` copies a pointee.
+- **`set`** - `set.Lookup[T]` is `map[T]struct{}` with `Has`/`Add`/`Delete`/`Clear`; build one with `set.NewLookup("a", "b")`.
+- **`quick`** - `quick.Append(a, b...)` appends only elements not already present; trades extra memory (and GC pressure) for speed on large slices.
+- **`errs`** - `errs.UnwrapDeep(err)` walks a wrapped error chain to the root cause.
+- **`reflectish`** - `IndirectDeep` for deep pointer dereferencing, `LengthOf` for the length of anything length-y, panic-safe `Interface`.
+- **`k1`** (root) - `k1.JoinStringers(vals, ", ")` joins any slice of `fmt.Stringer`s.
+
+Issues and PRs are welcome.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT - see [LICENSE](LICENSE).
