@@ -124,8 +124,11 @@ None marshals as `null` in JSON and as the `"None"` sentinel in TOML; text unmar
 - **`reflectish`** - `IndirectDeep` for deep pointer dereferencing, `LengthOf` for the length of anything length-y, panic-safe `Interface`.
 - **`k1`** (root) - `k1.JoinStringers(vals, ", ")` joins any slice of `fmt.Stringer`s.
 
-Issues and PRs are welcome.
+## Feedback
+
+k1 is a solo, opinionated project - but if you stumbled upon it and have
+ideas, questions, or bug reports, an [issue](https://github.com/amberpixels/k1/issues) is always welcome :)
 
 ## License
 
-MIT - see [LICENSE](LICENSE).
+[MIT](LICENSE) © [amberpixels](https://amberpixels.io)
