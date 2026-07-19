@@ -46,3 +46,19 @@ func TestClone(t *testing.T) {
 		be.Expect(t, ptr.Clone(p)).To(be.Nil())
 	})
 }
+
+func TestEqual(t *testing.T) {
+	t.Run("compares values behind pointers", func(t *testing.T) {
+		a, b, c := 42, 42, 7
+		be.Expect(t, ptr.Equal(&a, &b)).To(be.Eq(true))
+		be.Expect(t, ptr.Equal(&a, &c)).To(be.Eq(false))
+	})
+
+	t.Run("nil handling", func(t *testing.T) {
+		var none *string
+		s := "x"
+		be.Expect(t, ptr.Equal(none, none)).To(be.Eq(true))
+		be.Expect(t, ptr.Equal(none, &s)).To(be.Eq(false))
+		be.Expect(t, ptr.Equal(&s, none)).To(be.Eq(false))
+	})
+}

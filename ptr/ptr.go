@@ -20,3 +20,12 @@ func Clone[T any](p *T) *T {
 	c := *p
 	return &c
 }
+
+// Equal reports whether two pointers hold equal values.
+// Two nils are equal; a nil never equals a non-nil.
+func Equal[T comparable](a, b *T) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
+}
