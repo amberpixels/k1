@@ -2,15 +2,15 @@ package quick_test
 
 import (
 	"fmt"
+	"math/rand"
 	"runtime"
 	"slices"
 	"testing"
-
-	"math/rand"
 	"time"
 
-	"github.com/amberpixels/k1/quick"
 	"github.com/expectto/be"
+
+	"github.com/amberpixels/k1/quick"
 )
 
 func TestAppend(t *testing.T) {
@@ -217,9 +217,6 @@ func TestAppendEqualsSlowAppend(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			gotQ := quick.Append(tc.a, tc.b...)
 			gotS := SlowAppend(tc.a, tc.b...)
-			// fmt.Println(gotQ)
-			// fmt.Println(gotS)
-
 			// Ensure Append matches SlowAppend
 			be.Expect(t, gotQ).To(be.Eq(gotS))
 
@@ -258,7 +255,7 @@ func BenchmarkAppendVsSlowAppend(b *testing.B) {
 	b.Run("Append", func(b *testing.B) {
 		var result []string
 		// Measure memory allocation
-		allocBytes, allocObjects, freeObjects := measureMemory(func() {
+		stats := measureMemory(func() {
 			for range b.N {
 				b.StopTimer()
 				// Clone slices to ensure fair comparison
@@ -271,9 +268,9 @@ func BenchmarkAppendVsSlowAppend(b *testing.B) {
 				result = quick.Append(aCopy, bCopy...)
 			}
 		})
-		b.ReportMetric(float64(allocBytes)/float64(b.N), "bytes/op")
-		b.ReportMetric(float64(allocObjects)/float64(b.N), "allocs/op")
-		b.ReportMetric(float64(freeObjects)/float64(b.N), "frees/op")
+		b.ReportMetric(float64(stats.allocBytes)/float64(b.N), "bytes/op")
+		b.ReportMetric(float64(stats.allocObjects)/float64(b.N), "allocs/op")
+		b.ReportMetric(float64(stats.freeObjects)/float64(b.N), "frees/op")
 		b.Logf("Append result length: %d", len(result))
 	})
 
@@ -281,7 +278,7 @@ func BenchmarkAppendVsSlowAppend(b *testing.B) {
 	b.Run("SlowAppend", func(b *testing.B) {
 		var result []string
 		// Measure memory allocation
-		allocBytes, allocObjects, freeObjects := measureMemory(func() {
+		stats := measureMemory(func() {
 			for range b.N {
 				b.StopTimer()
 				// Clone slices to ensure fair comparison
@@ -294,9 +291,9 @@ func BenchmarkAppendVsSlowAppend(b *testing.B) {
 				result = SlowAppend(aCopy, bCopy...)
 			}
 		})
-		b.ReportMetric(float64(allocBytes)/float64(b.N), "bytes/op")
-		b.ReportMetric(float64(allocObjects)/float64(b.N), "allocs/op")
-		b.ReportMetric(float64(freeObjects)/float64(b.N), "frees/op")
+		b.ReportMetric(float64(stats.allocBytes)/float64(b.N), "bytes/op")
+		b.ReportMetric(float64(stats.allocObjects)/float64(b.N), "allocs/op")
+		b.ReportMetric(float64(stats.freeObjects)/float64(b.N), "frees/op")
 		b.Logf("SlowAppend result length: %d", len(result))
 	})
 }
@@ -403,7 +400,7 @@ func BenchmarkComprehensive(b *testing.B) {
 // generateRandomStrings generates n random strings of specified length with duplicateRate percentage of duplicates.
 //
 //nolint:unparam // it's for future
-func generateRandomStrings(n int, strLen int, duplicateRate float64) []string {
+func generateRandomStrings(n, strLen int, duplicateRate float64) []string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	result := make([]string, n)
 
@@ -445,8 +442,15 @@ func generateRandomStrings(n int, strLen int, duplicateRate float64) []string {
 	return result
 }
 
+// memStats holds the deltas measured around one measureMemory run.
+type memStats struct {
+	allocBytes   uint64
+	allocObjects uint64
+	freeObjects  uint64
+}
+
 // measureMemory returns memory stats after running a function.
-func measureMemory(f func()) (uint64, uint64, uint64) {
+func measureMemory(f func()) memStats {
 	// Run GC before measurement
 	runtime.GC()
 
@@ -455,9 +459,9 @@ func measureMemory(f func()) (uint64, uint64, uint64) {
 	f()
 	runtime.ReadMemStats(&m2)
 
-	allocBytes := m2.TotalAlloc - m1.TotalAlloc
-	allocObjects := m2.Mallocs - m1.Mallocs
-	freeObjects := m2.Frees - m1.Frees
-
-	return allocBytes, allocObjects, freeObjects
+	return memStats{
+		allocBytes:   m2.TotalAlloc - m1.TotalAlloc,
+		allocObjects: m2.Mallocs - m1.Mallocs,
+		freeObjects:  m2.Frees - m1.Frees,
+	}
 }

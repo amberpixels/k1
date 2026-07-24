@@ -49,7 +49,7 @@ func AsString(a any) string {
 	if v.Kind() == reflect.String {
 		return v.String()
 	}
-	if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeOf([]byte{})) {
+	if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeFor[[]byte]()) {
 		return string(v.Bytes())
 	}
 
@@ -88,7 +88,7 @@ func AsBytes(a any) []byte {
 	v := reflect.ValueOf(a)
 	v = reflectish.IndirectDeep(v)
 
-	if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeOf([]byte{})) {
+	if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeFor[[]byte]()) {
 		return v.Bytes()
 	}
 	if v.Kind() == reflect.String {
@@ -376,7 +376,7 @@ func AsSliceOfAny(v any) []any {
 
 	if rv.Kind() == reflect.Slice {
 		slice := make([]any, rv.Len())
-		for i := 0; i < rv.Len(); i++ {
+		for i := range rv.Len() {
 			slice[i] = rv.Index(i).Interface()
 		}
 		return slice
@@ -400,7 +400,7 @@ func AsStrings(v any) []string {
 	// todo: support arrays?
 	if rv.Kind() == reflect.Slice {
 		slice := make([]string, rv.Len())
-		for i := 0; i < rv.Len(); i++ {
+		for i := range rv.Len() {
 			// Must be a string-kind element (string or a custom type whose
 			// underlying type is string). ConvertibleTo(string) is too permissive:
 			// integers are convertible to string (rune conversion), but

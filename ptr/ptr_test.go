@@ -3,8 +3,9 @@ package ptr_test
 import (
 	"testing"
 
-	"github.com/amberpixels/k1/ptr"
 	"github.com/expectto/be"
+
+	"github.com/amberpixels/k1/ptr"
 )
 
 func TestDeref(t *testing.T) {

@@ -86,7 +86,7 @@ func IsString(a any, opts ...optIsString) bool {
 		}
 
 		if cfg.AllowBytesConversion {
-			if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeOf([]byte{})) {
+			if v.Kind() == reflect.Slice && v.Type().AssignableTo(reflect.TypeFor[[]byte]()) {
 				return true
 			}
 		}
@@ -113,12 +113,6 @@ func init() {
 	ConfigureIsStringConfig()
 }
 
-// clone is done via simple struct-copy (we're fine with this for now).
-func (cis *isStringConfig) clone() *isStringConfig {
-	var clone = *cis
-	return &clone
-}
-
 // IsStrict returns if IsString() should be strict: so it will return true only for actual `string` values.
 func (cis *isStringConfig) IsStrict() bool {
 	// Strict mode is when all flags are false
@@ -129,13 +123,19 @@ func (cis *isStringConfig) IsStrict() bool {
 // AllowsAll returns true if all custom options are enabled.
 func (cis *isStringConfig) AllowsAll() bool {
 	el := reflect.ValueOf(cis).Elem()
-	var result = true
-	for i := 0; i < el.NumField(); i++ {
-		if result = result && el.Field(i).Bool(); !result {
+	result := true
+	for _, field := range el.Fields() {
+		if result = result && field.Bool(); !result {
 			break
 		}
 	}
 	return result
+}
+
+// clone is done via simple struct-copy (we're fine with this for now).
+func (cis *isStringConfig) clone() *isStringConfig {
+	clone := *cis
+	return &clone
 }
 
 // ConfigureIsStringConfig sets the default configuration for IsString checks.
@@ -177,8 +177,8 @@ func AllowAll() optIsString {
 	return func(cfg *isStringConfig) {
 		v := reflect.ValueOf(cfg).Elem()
 
-		for i := 0; i < v.NumField(); i++ {
-			v.Field(i).SetBool(true)
+		for _, field := range v.Fields() {
+			field.SetBool(true)
 		}
 	}
 }

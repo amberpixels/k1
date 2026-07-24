@@ -1,4 +1,3 @@
-// Package reflectish contains helpers that extends standard reflect library
 package reflectish
 
 import "reflect"

@@ -3,8 +3,9 @@ package set_test
 import (
 	"testing"
 
-	"github.com/amberpixels/k1/set"
 	"github.com/expectto/be"
+
+	"github.com/amberpixels/k1/set"
 )
 
 // TestNewLookupEmpty verifies an empty lookup reports no membership.

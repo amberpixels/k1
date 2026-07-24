@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/amberpixels/k1/errs"
 	"github.com/expectto/be"
+
+	"github.com/amberpixels/k1/errs"
 )
 
 func TestUnwrapDeep_NilError(t *testing.T) {

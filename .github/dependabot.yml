@@ -1,0 +1,17 @@
+version: 2
+
+updates:
+  # Covers the standardgo toolchain bump and the test-only dependency on
+  # expectto/be: when be tags a release, the PR here is what proves k1 is
+  # tested by the latest be.
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

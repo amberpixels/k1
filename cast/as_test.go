@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	cast "github.com/amberpixels/k1/cast"
 	"github.com/expectto/be"
 	"github.com/expectto/be/be_math"
 	"github.com/expectto/be/be_reflected"
+
+	cast "github.com/amberpixels/k1/cast"
 )
 
 type (

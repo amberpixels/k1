@@ -4,9 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/amberpixels/k1/reflectish"
 	"github.com/expectto/be"
 	"github.com/expectto/be/be_reflected"
+
+	"github.com/amberpixels/k1/reflectish"
 )
 
 func TestIndirectDeep(t *testing.T) {

@@ -3,9 +3,10 @@ package k1_test
 import (
 	"testing"
 
-	"github.com/amberpixels/k1"
 	"github.com/expectto/be"
 	"github.com/expectto/be/be_string"
+
+	"github.com/amberpixels/k1"
 )
 
 // word is a tiny fmt.Stringer for exercising JoinStringers.
