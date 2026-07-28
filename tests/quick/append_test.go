@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/expectto/be"
-
 	"github.com/amberpixels/k1/quick"
+	"github.com/expectto/be"
 )
 
 func TestAppend(t *testing.T) {

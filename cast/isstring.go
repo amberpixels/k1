@@ -124,8 +124,9 @@ func (cis *isStringConfig) IsStrict() bool {
 func (cis *isStringConfig) AllowsAll() bool {
 	el := reflect.ValueOf(cis).Elem()
 	result := true
-	for _, field := range el.Fields() {
-		if result = result && field.Bool(); !result {
+	// Not el.Fields(): that iterator needs go1.26.
+	for i := range el.NumField() {
+		if result = result && el.Field(i).Bool(); !result {
 			break
 		}
 	}
@@ -177,8 +178,9 @@ func AllowAll() optIsString {
 	return func(cfg *isStringConfig) {
 		v := reflect.ValueOf(cfg).Elem()
 
-		for _, field := range v.Fields() {
-			field.SetBool(true)
+		// Not v.Fields(): that iterator needs go1.26.
+		for i := range v.NumField() {
+			v.Field(i).SetBool(true)
 		}
 	}
 }

@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/expectto/be"
-
 	cast "github.com/amberpixels/k1/cast"
+	"github.com/expectto/be"
 )
 
 func TestIsStringStrict(t *testing.T) {

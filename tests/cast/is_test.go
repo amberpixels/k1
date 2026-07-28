@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/expectto/be"
-
 	cast "github.com/amberpixels/k1/cast"
+	"github.com/expectto/be"
 )
 
 func TestIsNil(t *testing.T) {

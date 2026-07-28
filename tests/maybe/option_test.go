@@ -5,10 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/amberpixels/k1/maybe"
 	"github.com/expectto/be"
 	"github.com/expectto/be/be_reflected"
-
-	"github.com/amberpixels/k1/maybe"
 )
 
 func TestNoneAndSomeMethods(t *testing.T) {
