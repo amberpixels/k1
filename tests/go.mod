@@ -5,7 +5,7 @@
 // floors converge, the split stays; only the `floor` recipe would become redundant.
 module github.com/amberpixels/k1/tests
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/amberpixels/k1 v0.1.6
